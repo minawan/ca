@@ -8,19 +8,14 @@ zeroCell = '⬛'
 oneCell = '⬜'
 
 getNext :: Rule -> [Bool] -> [Bool]
-getNext rule [] = getNext' rule False [False]
+getNext rule [] = getNext' rule False False [False]
 getNext rule (left:cells) =
-  rule False False left : getNext'' rule False left cells
+  rule False False left : getNext' rule False left cells
 
-getNext' :: Rule -> Bool -> [Bool] -> [Bool]
-getNext' rule left [] = [rule left False False]
-getNext' rule left (mid:cells) =
-  rule False left mid : getNext'' rule left mid cells
-
-getNext'' :: Rule -> Bool -> Bool -> [Bool] -> [Bool]
-getNext'' rule left mid [] = [rule left mid False, rule mid False False]
-getNext'' rule left mid (right:cells) =
-  rule left mid right : getNext'' rule mid right cells
+getNext' :: Rule -> Bool -> Bool -> [Bool] -> [Bool]
+getNext' rule left mid [] = [rule left mid False, rule mid False False]
+getNext' rule left mid (right:cells) =
+  rule left mid right : getNext' rule mid right cells
 
 genRule :: Int -> Rule
 genRule n left mid right = testBit n repr
