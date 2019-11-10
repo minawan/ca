@@ -1,6 +1,6 @@
-import Data.Bits (testBit)
 import Control.Monad (foldM)
 import Control.Monad.Extra (iterateMaybeM)
+import Data.Bits (testBit)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import System.Environment (getArgs)
