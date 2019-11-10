@@ -1,11 +1,8 @@
-import Control.Monad (foldM)
 import Control.Monad.Extra (iterateMaybeM)
-import Data.Bits (testBit)
-import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
+import Data.Bits (shiftL, testBit, (.|.))
 import System.Environment (getArgs)
 
-type Rule = Map (Bool, Bool, Bool) Bool
+type Rule = Bool -> Bool -> Bool -> Bool
 
 zeroCell = '⬛'
 oneCell = '⬜'
@@ -13,42 +10,22 @@ oneCell = '⬜'
 getNext :: Rule -> [Bool] -> [Bool]
 getNext rule [] = getNext' rule False [False]
 getNext rule (left:cells) =
-  case Map.lookup (False, False, left) rule of
-    Just left' -> case getNext'' rule False left cells of
-                    [] -> []
-                    cells' -> left' : cells'
-    Nothing -> []
+  rule False False left : getNext'' rule False left cells
 
 getNext' :: Rule -> Bool -> [Bool] -> [Bool]
-getNext' rule left [] =
-  case Map.lookup (left, False, False) rule of
-    Just cell -> [cell]
-    Nothing -> []
+getNext' rule left [] = [rule left False False]
 getNext' rule left (mid:cells) =
-  case Map.lookup (False, left, mid) rule of
-    Just left' -> case getNext'' rule left mid cells of
-                    [] -> []
-                    cells' -> left' : cells'
-    Nothing -> []
+  rule False left mid : getNext'' rule left mid cells
 
 getNext'' :: Rule -> Bool -> Bool -> [Bool] -> [Bool]
-getNext'' rule left mid [] =
-  case Map.lookup (left, mid, False) rule of
-    Just mid' -> case Map.lookup (mid, False, False) rule of
-                   Just right -> [mid', right]
-                   Nothing -> []
-    Nothing -> []
+getNext'' rule left mid [] = [rule left mid False, rule mid False False]
 getNext'' rule left mid (right:cells) =
-  case Map.lookup (left, mid, right) rule of
-    Just mid' -> case getNext'' rule mid right cells of
-                   [] -> []
-                   cells' -> mid' : cells'
-    Nothing -> []
+  rule left mid right : getNext'' rule mid right cells
 
 genRule :: Int -> Rule
-genRule n = Map.fromList . zip allBoolTriples $ map (testBit n) [0..7]
-  where bools = [False, True]
-        allBoolTriples = [(x, y, z) | x <- bools, y <- bools, z <- bools]
+genRule n left mid right = testBit n repr
+  where toBit cell = if cell then 1 else 0
+        repr = foldl (\x y -> shiftL x 1 .|. y) 0 (map toBit [left, mid, right])
 
 showPadded :: Int -> [Bool] -> String
 showPadded n cells
