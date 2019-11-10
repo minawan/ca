@@ -57,6 +57,11 @@ showPadded n cells
   where showCell x = if x then oneCell else zeroCell
         padding = take ((n - length cells) `div` 2) $ repeat zeroCell
 
+printTrace :: Rule -> Int -> [Bool] -> Int -> IO ()
+printTrace rule width cells maxIter = do
+  _ <- iterateMaybeM (aux rule width) ([True], maxIter)
+  return ()
+
 aux :: Rule -> Int -> ([Bool], Int) -> IO (Maybe ([Bool] , Int))
 aux rule width (cells, i)
   | i <= 0 = return Nothing
@@ -71,6 +76,6 @@ main = do
   let rule = genRule (read (args !! 0) :: Int)
   let maxIter = read (args !! 1) :: Int
   let width = 2 * maxIter + 1
-  putStrLn $ showPadded width [True]
-  _ <- iterateMaybeM (aux rule width) ([True], maxIter)
-  return ()
+  let initialCells = [True]
+  putStrLn $ showPadded width initialCells
+  printTrace rule width initialCells maxIter
