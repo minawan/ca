@@ -1,4 +1,3 @@
-import Control.Monad.Extra (iterateMaybeM)
 import Data.Bits (shiftL, testBit, (.|.))
 import System.Environment (getArgs)
 
@@ -23,23 +22,11 @@ genRule n left mid right = testBit n repr
         repr = foldl (\x y -> shiftL x 1 .|. y) 0 (map toBit [left, mid, right])
 
 showPadded :: Int -> [Bool] -> String
-showPadded n cells
-  | n <= 0 = ""
+showPadded width cells
+  | width <= 0 = ""
   | otherwise = padding ++ map showCell cells ++ padding
-  where showCell x = if x then oneCell else zeroCell
-        padding = take ((n - length cells) `div` 2) $ repeat zeroCell
-
-printTrace :: Rule -> Int -> [Bool] -> Int -> IO ()
-printTrace rule width cells maxIter = do
-  _ <- iterateMaybeM (aux rule width) ([True], maxIter)
-  return ()
-
-aux :: Rule -> Int -> ([Bool], Int) -> IO (Maybe ([Bool] , Int))
-aux rule width (cells, i)
-  | i <= 0 = return Nothing
-  | otherwise = do putStrLn $ showPadded width cells'
-                   return $ Just (cells', i - 1)
-  where cells' = getNext rule cells
+  where showCell cell = if cell then oneCell else zeroCell
+        padding = take ((width - length cells) `div` 2) $ repeat zeroCell
 
 main :: IO ()
 main = do
@@ -47,6 +34,7 @@ main = do
   let rule = genRule (read (args !! 0) :: Int)
   let maxIter = read (args !! 1) :: Int
   let width = 2 * maxIter + 1
-  let initialCells = [True]
-  putStrLn $ showPadded width initialCells
-  printTrace rule width initialCells maxIter
+  mapM_ (putStrLn . showPadded width)
+    . take maxIter
+    . iterate (getNext rule)
+    $ [True]
