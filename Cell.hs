@@ -37,10 +37,9 @@ printTrace rule width cells maxIter = do
 aux :: Rule -> Int -> ([Bool], Int) -> IO (Maybe ([Bool] , Int))
 aux rule width (cells, i)
   | i <= 0 = return Nothing
-  | otherwise = case getNext rule cells of
-                  [] -> return Nothing
-                  cells -> do putStrLn $ showPadded width cells
-                              return $ Just (cells, i - 1)
+  | otherwise = do putStrLn $ showPadded width cells'
+                   return $ Just (cells', i - 1)
+  where cells' = getNext rule cells
 
 main :: IO ()
 main = do
