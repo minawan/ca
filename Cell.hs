@@ -61,8 +61,8 @@ aux :: Rule -> Int -> ([Bool], Int) -> IO (Maybe ([Bool] , Int))
 aux rule width (cells, i)
   | i <= 0 = return Nothing
   | otherwise = case getNext rule cells of
-                  Just cells -> (do putStrLn $ showPadded width cells
-                                    return $ Just (cells, i - 1))
+                  Just cells -> do putStrLn $ showPadded width cells
+                                   return $ Just (cells, i - 1)
                   Nothing -> return Nothing
 
 main :: IO ()
